@@ -10,6 +10,7 @@ jobs:
       - run: pip3 install -e .[dev]
       - run: make lint
       - run: make coverage
+      - run: make typecheck
       - store_artifacts:
           path: test_output/coverage
           destination: reports

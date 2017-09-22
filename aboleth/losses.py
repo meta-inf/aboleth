@@ -1,9 +1,17 @@
 """Network loss functions."""
 import tensorflow as tf
+import numpy as np
+from typing import Union, Callable
 
 
-def elbo(likelihood, Y, N, KL, like_weights=None):
-    """Build the evidence lower bound loss for a neural net.
+def elbo(
+    likelihood: tf.distributions.Distribution,
+    Y: Union[np.ndarry, tf.Tensor],
+    N: Union[int, tf.Tensor],
+    KL: Union[float, tf.Tensor],
+    like_weights: Union[None, Callable, np.ndarray, tf.Tensor]=None
+) -> tf.Tensor:
+    r"""Build the evidence lower bound loss for a neural net.
 
     Parameters
     ----------
@@ -17,6 +25,9 @@ def elbo(likelihood, Y, N, KL, like_weights=None):
         the targets of shape (N, tasks).
     N : int, Tensor
         the total size of the dataset (i.e. number of observations).
+    KL : float, Tensor
+        the Kullback Leibler divergence between the posterior and prior
+        parameters of the model (:math:`\text{KL}[q\|p]`).
     like_weights : callable, ndarray, Tensor
         weights to apply to each observation in the expected log likelihood.
         This should be an array of shape (N,) or can be called as
@@ -47,8 +58,13 @@ def elbo(likelihood, Y, N, KL, like_weights=None):
     return nELBO
 
 
-def max_posterior(likelihood, Y, regulariser, like_weights=None,
-                  first_axis_is_obs=True):
+def max_posterior(
+    likelihood: tf.distributions.Distribution,
+    Y: Union[np.ndarray, tf.Tensor],
+    regulariser: Union[float, tf.Tensor],
+    like_weights: Union[None, Callable, np.ndarray, tf.Tensor]=None,
+    first_axis_is_obs: bool=True
+) -> tf.Tensor:
     """Build maximum a-posteriori (MAP) loss for a neural net.
 
     Parameters
@@ -61,6 +77,9 @@ def max_posterior(likelihood, Y, regulariser, like_weights=None,
         you are using a placeholder and mini-batching).
     Y : ndarray, Tensor
         the targets of shape (N, tasks).
+    regulariser : float, Tensor
+        the regulariser on the parameters of the model to penalise model
+        complexity.
     like_weights : callable, ndarray, Tensor
         weights to apply to each observation in the expected log likelihood.
         This should be an array of shape (N,) or can be called as

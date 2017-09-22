@@ -6,6 +6,7 @@ help:
 	@echo "lint - check style with flake8"
 	@echo "test - run tests quickly with the default Python"
 	@echo "coverage - check code coverage quickly with the default Python"
+	@echo "typecheck - check code static types with mypy"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "release - package and upload a release"
 	@echo "sdist - package"
@@ -30,6 +31,10 @@ test:
 
 coverage:
 	py.test -s --junit-xml=test_output/pytest/results.xml --cov=./aboleth --cov-report=html:test_output/coverage --cache-clear --cov-fail-under=90 .
+
+typecheck:
+	mkdir -p test_output/mypy  # Mypy doesn't do this automatically...
+	mypy --junit-xml=test_output/mypy/results.xml ./aboleth
 
 docs:
 	$(MAKE) -C docs clean
