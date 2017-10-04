@@ -6,7 +6,7 @@ from typing import Union, Callable
 
 def elbo(
     likelihood: tf.distributions.Distribution,
-    Y: Union[np.ndarry, tf.Tensor],
+    Y: Union[np.ndarray, tf.Tensor],
     N: Union[int, tf.Tensor],
     KL: Union[float, tf.Tensor],
     like_weights: Union[None, Callable, np.ndarray, tf.Tensor]=None

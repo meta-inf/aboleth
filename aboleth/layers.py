@@ -1,6 +1,7 @@
 """Network layers and utilities."""
 import numpy as np
 import tensorflow as tf
+from typing import Union, Tuple
 
 from aboleth.kernels import RBF, RBFVariational
 from aboleth.random import seedgen
@@ -31,12 +32,13 @@ class InputLayer(MultiLayer):
 
     """
 
-    def __init__(self, name, n_samples=None):
+    def __init__(self, name: str, n_samples: Union[None, int]=None) -> None:
         """Construct an instance of InputLayer."""
         self.name = name
         self.n_samples = n_samples
 
-    def _build(self, **kwargs):
+    def _build(self, **kwargs: tf.Tensor) \
+            -> Tuple[tf.Tensor, Union[float, tf.Tensor]]:
         """Build the tiling input layer."""
         X = kwargs[self.name]
         if self.n_samples is not None:
