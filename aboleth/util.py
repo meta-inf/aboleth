@@ -2,7 +2,51 @@
 import tensorflow as tf
 import numpy as np
 
+from tensorflow.python.framework import meta_graph
+from tensorflow.python.framework import ops
+from tensorflow.python.training import training_util
+from tensorflow.python.training.session_run_hook import SessionRunArgs
+
 from aboleth.random import endless_permutations
+
+
+class CurrentBestCheckpointSaverHook(tf.train.CheckpointSaverHook):
+
+    def __init__(self, tensor, *args, **kwargs):
+        self.tensor = tensor
+        self.current_min_tensor_value = None
+        super(CurrentBestCheckpointSaverHook, self).__init__(*args, **kwargs)
+
+    def before_run(self, run_context):
+        if self._timer.last_triggered_step() is None:
+            training_util.write_graph(
+                ops.get_default_graph().as_graph_def(add_shapes=True),
+                self._checkpoint_dir,
+                "graph.pbtxt")
+            saver_def = self._get_saver().saver_def if self._get_saver() \
+                else None
+            graph = ops.get_default_graph()
+            meta_graph_def = meta_graph.create_meta_graph_def(
+                graph_def=graph.as_graph_def(add_shapes=True),
+                saver_def=saver_def)
+            self._summary_writer.add_graph(graph)
+            self._summary_writer.add_meta_graph(meta_graph_def)
+
+        return SessionRunArgs(self._global_step_tensor, self.tensor)
+
+    def after_run(self, run_context, run_values):
+        stale_global_step, tensor_value = run_values.results
+        if self._timer.should_trigger_for_step(stale_global_step+1):
+            # get the real value after train op.
+            global_step = run_context.session.run(self._global_step_tensor)
+            if self._timer.should_trigger_for_step(global_step):
+                self._timer.update_last_triggered_step(global_step)
+
+                if (self.current_min_tensor_value is None) or \
+                   (tensor_value < self.current_min_tensor_value):
+
+                    self.current_min_tensor_value = tensor_value
+                    self._save(run_context.session, global_step)
 
 
 def pos(X, minval=1e-15):

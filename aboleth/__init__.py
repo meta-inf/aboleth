@@ -12,7 +12,8 @@ from .impute import (MaskInputLayer, MeanImpute, FixedNormalImpute,
 from .kernels import RBF, Matern, RBFVariational
 from .distributions import (norm_prior, norm_posterior, gaus_posterior)
 from .prediction import sample_mean, sample_percentiles
-from .util import (batch, pos, batch_prediction)
+from .util import (batch, pos, batch_prediction,
+                   CurrentBestCheckpointSaverHook)
 from .random import set_hyperseed
 
 __all__ = (
@@ -53,5 +54,6 @@ __all__ = (
     'LearnedNormalImpute',
     'RBF',
     'RBFVariational',
-    'Matern'
+    'Matern',
+    'CurrentBestCheckpointSaverHook'
 )

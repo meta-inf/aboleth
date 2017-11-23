@@ -6,6 +6,7 @@ import aboleth as ab
 
 from tensorflow.examples.tutorials.mnist import input_data as mnist_data
 
+
 from sklearn.metrics import accuracy_score, log_loss
 
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -86,6 +87,8 @@ def main():
         accuracy = tf.reduce_mean(
             tf.cast(tf.equal(tf.argmax(probs, axis=1), Y), dtype=tf.float32))
 
+    tf.summary.scalar('accuracy', accuracy)
+
     # Training graph building
     with tf.name_scope("train"):
         optimizer = tf.train.AdamOptimizer(learning_rate=1e-3)
@@ -97,9 +100,21 @@ def main():
         every_n_secs=5
     )
 
+    summary_hook = tf.train.SummarySaverHook(
+        save_secs=5,
+        output_dir='./mnist_softmax',
+        summary_op=tf.summary.merge_all()
+    )
+
+    checkpoint_hook = ab.util.CurrentBestCheckpointSaverHook(
+        tensor=loss,
+        checkpoint_dir='./mnist_softmax',
+        save_secs=10,
+    )
+
     with tf.train.MonitoredTrainingSession(
         config=config,
-        hooks=[logger]
+        hooks=[logger, checkpoint_hook]
     ) as sess:
 
         while not sess.should_stop():
